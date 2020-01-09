@@ -3,7 +3,9 @@
 //
 
 #include "ConditionParser.h"
-double ConditionParser::checkBoolExpression(list<string> leftExpression, std::string boolOperator, list<string> rightExpression) {
+
+double ConditionParser::checkBoolExpression(list<string> leftExpression, std::string boolOperator,
+                                            list<string> rightExpression) {
     ExpressionFactory factory = ExpressionFactory();
     Expression *leftExpr = factory.create(leftExpression);
     Expression *rightExpr = factory.create(rightExpression);

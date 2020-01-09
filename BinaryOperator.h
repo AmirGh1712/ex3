@@ -8,20 +8,21 @@
  */
 class BinaryOperator : public Expression {
 protected:
-    Expression* leftEx;
-    Expression* rightEx;
+    Expression *leftEx;
+    Expression *rightEx;
 public:
-    BinaryOperator(Expression* left, Expression* right) {
+    BinaryOperator(Expression *left, Expression *right) {
         this->leftEx = left;
         this->rightEx = right;
     }
+
     virtual double calculate() = 0;
+
     virtual ~BinaryOperator() override {
-        delete(this->leftEx);
-        delete(this->rightEx);
+        delete (this->leftEx);
+        delete (this->rightEx);
     }
 };
-
 
 
 #endif //BINARY_OPERATOR_H

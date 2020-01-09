@@ -12,16 +12,16 @@
 #include <algorithm>
 #include <vector>
 #include <stack>
+#include <list>
 
 using namespace std;
 
+/**
+ * Creates an expression from a list of tokens.
+ */
 class ExpressionFactory {
 public:
-/**
- * creating an expression
- * @param tokens list of tokes
- * @return expression
- */
+
     Expression *create(list<string> tokens);
 
 };

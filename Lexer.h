@@ -13,11 +13,15 @@
 
 using namespace std;
 
+/**
+ * The lexer for our program.
+ */
 class Lexer {
 private:
     list<string> specialCharacters{"+", "<", ">", "==", "<=", ">=", "/\"", "/", "(",
                                    ")",
                                    "*", "-", "=", "\"", ",", "{", "}", "\t"};
+
 /**
      * The function will replace all occurrences of a certain substring with another substring.
      * @param subject the main string we want to chance.
@@ -33,8 +37,6 @@ private:
      */
     void addSpaces(string &s);
 
-    list<string> appendSpecialSigns(list<string> tokens);
-
     vector<string> baseSplit(string &s, char delimiter) {
         vector<string> tokens;
         string token;
@@ -44,6 +46,7 @@ private:
         }
         return tokens;
     }
+
 public:
     /**
      * The function creates a list of tokens from the string, with a delimiter for

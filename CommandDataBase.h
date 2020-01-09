@@ -7,13 +7,12 @@
 
 #include <map>
 #include <string>
-#include <vector>
 #include "Command.h"
 
 using namespace std;
 
 /**
- * class created in order to store variables and their current values.
+ * A database of the variables read.
  */
 class CommandDataBase {
     map<string, Command *> commandTable;
@@ -21,7 +20,9 @@ public:
     const map<string, Command *> &getCommandTable() const {
         return commandTable;
     };
-    void addCommand(string varName, Command* c);
+
+    void addCommand(string varName, Command *c);
+
     Command *getCommand(const string &CommandName);
 
 };
