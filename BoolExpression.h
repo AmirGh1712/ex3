@@ -9,7 +9,9 @@
 #include "BinaryOperator.h"
 
 #include <stdexcept>
-
+/*
+ * an expression with a left side, an operator and a right side
+ */
 class BoolExpression :public BinaryOperator{
     string condition;
 public:
@@ -17,6 +19,7 @@ public:
         this->condition = c;
     }
 
+    // Returns either 0 or 1
     double calculate();
 };
 
