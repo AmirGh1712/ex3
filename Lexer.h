@@ -56,8 +56,22 @@ public:
      * @return list of strings of all the tokens.
      */
     list<string> lexer(string &s, char delimiter);
-
-
+    inline list<string> lexerFromFile(const string &fileName, char delimiter) {
+        std::ifstream t;
+        int length;
+        t.open(fileName);      // open input file
+        t.seekg(0, std::ios::end);    // go to the end
+        length = t.tellg();           // report location (this is the length)
+        t.seekg(0, std::ios::beg);    // go back to the beginning
+        char *buffer = new char[length];    // allocate memory for a buffer of appropriate dimension
+        t.read(buffer, length);       // read the whole file into the buffer
+        t.close();
+        string s;
+        for (int i = 0; i < length; ++i) {
+            s += buffer[i];
+        }
+        return lexer(s, delimiter);
+    }
 };
 
 
