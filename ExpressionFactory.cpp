@@ -1,23 +1,10 @@
-//
-// Created by iddo on 05/01/2020.
-//
-
 #include "ExpressionFactory.h"
-#include "ExpressionFactory.h"
-#include "Number.h"
-#include "Plus.h"
-#include "Minus.h"
-#include "Div.h"
-#include "Mul.h"
 
-enum priority {
-    SPACIAL, SECOND, FIRST
-};
 
-bool isNum(string &token) {
+bool ExpressionFactory::isNum(string &token) {
     bool checkNegative = 0;
     bool showDot = 0;
-    for (int i = 0; i < token.length(); i++) {
+    for (unsigned int i = 0; i < token.length(); i++) {
         if (!checkNegative) {
             checkNegative = 1;
             if (token[i] == '-' && token.length() > 1)
@@ -34,119 +21,184 @@ bool isNum(string &token) {
     return true;
 }
 
-// convert postfix string to expression.
-Expression *stringToExpression(list<string> tokens) {
-    stack<Expression *> expressionStack;
-    for (list<string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
-        if (isNum(*it))
-            expressionStack.push(new Number(*it));
-        else if (*it == "--") {
-            if (expressionStack.empty())
-                throw runtime_error("not enough arguments or invalid argument");
-            Expression *e1 = expressionStack.top();
-            expressionStack.pop();
-            expressionStack.push(new Minus(new Number("0"), e1));
-        } else {
-            if (expressionStack.size() < 2)
-                throw runtime_error("not enough arguments or invalid argument");
-            Expression *e2 = expressionStack.top();
-            expressionStack.pop();
-            Expression *e1 = expressionStack.top();
-            expressionStack.pop();
-
-            if (*it == "+")
-                expressionStack.push(new Plus(e1, e2));
-            else if (*it == "-")
-                expressionStack.push(new Minus(e1, e2));
-            else if (*it == "/")
-                expressionStack.push(new Div(e1, e2));
-            else if (*it == "*")
-                expressionStack.push(new Mul(e1, e2));
-            else
-                throw runtime_error("no such argument");
-        }
-    }
-    Expression *expressionResult = expressionStack.top();
-    expressionStack.pop();
-    if (!expressionStack.empty())
-        throw runtime_error("invalid pattern");
-    return expressionResult;
-}
-
-Expression *shuntingYard(list<string> tokens) {
-    // create fifo and s data structures.
-    list<string> fifo;
-    stack<string> s;
-    map<string, int> op_priority;
-    // set map with priority of operators.
-    op_priority["+"] = SECOND;
-    op_priority["-"] = SECOND;
-    op_priority["*"] = FIRST;
-    op_priority["/"] = FIRST;
-    op_priority["("] = SPACIAL;
-    // represent negative operator;
-    op_priority["--"] = FIRST;
-
-    string strBefore = tokens.begin().operator*();
-    for (string &str : tokens) {
-        // in case of first token, check if first operator is minus
-        if (strBefore == str && str == "-") {
-            s.push("--");
-            continue;
-        }
-            // check if previous string was operator and this string is minus operator.
-        else if (op_priority.count(strBefore) && str == "-") {
-            strBefore = str;
-            s.push("--");
-            continue;
-        }
-        strBefore = str;
-        // in case of digit, place into fifo.
-        if (isNum(str))
-            fifo.push_back(str);
-            // in case of invalid operator, throw exaction.
-        else if (!(op_priority.count(str)) && str != ")")
-            throw runtime_error("invalid operator");
-        else if (str == ")") {
-            while (s.top() != "(") {
-                fifo.push_back(s.top());
-                s.pop();
-            }
-            // pop out '(' operator.
-            s.pop();
-        } else {
-            if (s.size() > 0) {
-                // in case of high priority operator, insert him.
-                if (op_priority[s.top()] >= op_priority[str] && str != "(") {
-                    fifo.push_back(s.top());
-                    s.pop();
-                }
-            }
-            s.push(str);
-        }
-    }
-    // while there is operators in stack, input them in fifo.
-    while (!s.empty()) {
-        fifo.push_back(s.top());
-        s.pop();
-    }
-    Expression *result = stringToExpression(fifo);
-    return result;
+bool ExpressionFactory::isVar(string &token) {
+    return this->vm->isExists(token);
 }
 
 Expression *ExpressionFactory::create(list<string> tokens) {
-    list<string> strExpression;
-    // for each token in tokens, search for var's value and replace.
+    stack<Expression*> output;
+    stack<char> operators;
     for (list<string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
-        // in case variable is in data base.
-        if (SymbolTable::instance()->getVarTable().count(*it) == 1) {
-            // get variable value.
-            double argumentValue = SymbolTable::instance()->getValue(*it);
-            strExpression.push_back(to_string(argumentValue));
-            continue;
+        if (isNum(*it)) {
+            //for number
+            char *s = (char *) malloc(sizeof(char) * (*it).length());
+            if (s == nullptr) {
+                throw MEMORY_ERROR;
+            }
+            for (unsigned int i = 0; i < (*it).length(); ++i) {
+                s[i] = (*it)[i];
+            }
+            double value = stod(s);
+            output.push(new Value(value));
+            delete(s);
+        } else if(isVar(*it)) {
+            //for variable
+            output.push(this->vm->getVar(*it));
+        } else if ((*it) == "+" || (*it) == "-") {
+            //for + and -
+            if (std::next(it,1)  == tokens.end()) {
+                throw EXPRESSION_ERROR;
+            }
+            //Unary
+            if (it != tokens.begin()) {
+                if ((*(prev(it, 1))) == "(") {
+                    if ((*it) == "+")
+                        operators.push('p');
+                    else if ((*it) == "-")
+                        operators.push('m');
+                    continue;
+                }
+            } else {
+                if (*it == "+")
+                    operators.push('p');
+                else if (*it == "-")
+                    operators.push('m');
+                continue;
+            }
+            //Binary
+            if (!operators.empty()) {
+                char o = operators.top();
+                while (o != ')' && o != '(') {
+                    operators.pop();
+                    addOperator(o, &output);
+                    if (operators.empty()) {
+                        break;
+                    }
+                    o = operators.top();
+                }
+            }
+            operators.push((*it)[0]);
+        } else if ((*it) == "*" || (*it) == "/") {
+            //for * and /
+            if (std::next(it,1)  == tokens.end()) {
+                throw EXPRESSION_ERROR;
+            }
+            if (!operators.empty()) {
+                char o = operators.top();
+                while (o == '*' || o == '/' || o == 'm' || o == 'p') {
+                    operators.pop();
+                    addOperator(o, &output);
+                    if (operators.empty()) {
+                        break;
+                    }
+                    o = operators.top();
+                }
+            }
+            operators.push((*it)[0]);
+        } else if((*it) == "(") {
+            operators.push('(');
+        } else if((*it) == ")") { // close ()
+            if (!operators.empty()) {
+                char o = operators.top();
+                while (o != '(') {
+                    operators.pop();
+                    addOperator(o, &output);
+                    if (operators.empty()) {
+                        throw EXPRESSION_ERROR;
+                    }
+                    o = operators.top();
+                }
+                operators.pop();
+            }
+        } else {
+            throw EXPRESSION_ERROR;
         }
-        strExpression.push_back(*it);
     }
-    Expression *expression = shuntingYard(strExpression);
-    return expression;
+    //The last ones
+    if (!operators.empty()) {
+        char o = operators.top();
+        while (!operators.empty()) {
+            operators.pop();
+            addOperator(o, &output);
+            if (operators.empty()) {
+                break;
+            }
+            o = operators.top();
+        }
+    }
+    return output.top();
+}
+
+void addOperator(char o, stack<Expression*> *output) {
+    if (o == '+') {
+        Expression *right = output->top();
+        if(right == nullptr) {
+            throw EXPRESSION_ERROR;
+        }
+        output->pop();
+        if(output->empty()) {
+            output->push(new UPlus(right));
+            return;
+        }
+        Expression *left = output->top();
+        if(left == nullptr) {
+            throw EXPRESSION_ERROR;
+        }
+        output->pop();
+        output->push(new Plus(left, right));
+    } else if (o == '-') {
+        Expression *right = output->top();
+        if(right == nullptr) {
+            throw EXPRESSION_ERROR;
+        }
+        output->pop();
+        if(output->empty()) {
+            output->push(new UMinus(right));
+            return;
+        }
+        Expression *left = output->top();
+        if(left == nullptr) {
+            throw EXPRESSION_ERROR;
+        }
+        output->pop();
+        output->push(new Minus(left, right));
+    } else if (o == '*') {
+        Expression *right = output->top();
+        if(right == nullptr) {
+            throw EXPRESSION_ERROR;
+        }
+        output->pop();
+        Expression *left = output->top();
+        if(left == nullptr) {
+            throw EXPRESSION_ERROR;
+        }
+        output->pop();
+        output->push(new Mul(left, right));
+    } else if (o == '/') {
+        Expression *right = output->top();
+        if(right == nullptr) {
+            throw EXPRESSION_ERROR;
+        }
+        output->pop();
+        Expression *left = output->top();
+        if(left == nullptr) {
+            throw EXPRESSION_ERROR;
+        }
+        output->pop();
+        output->push(new Div(left, right));
+    } else if (o == 'p') {
+        Expression *e = output->top();
+        if(e == nullptr) {
+            throw EXPRESSION_ERROR;
+        }
+        output->pop();
+        output->push(new UPlus(e));
+    } else if (o == 'm') {
+        Expression *e = output->top();
+        if(e == nullptr) {
+            throw EXPRESSION_ERROR;
+        }
+        output->pop();
+        output->push(new UMinus(e));
+    }
 }

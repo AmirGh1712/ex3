@@ -1,15 +1,41 @@
-//
-// Created by amir on 30/12/2019.
-//
-
 #include "Parser.h"
 
-void Parser::parser(string array[], int len, map<string, Command*> map) {
-    int  i = 0;
-    while (i < len) {
-        Command* c = map[array[i]];
+void parser(list<string> array, map<string, Command*> map, VariablesMap* vm, ExpressionFactory* ef) {
+    list<string>::iterator it = array.begin();
+    while (it != array.end()) {
+        if (*it == "\n") {
+            it++;
+            continue;
+        }
+        Command* c = map[*it];
         if (c != nullptr) {
-            i += c->execute(&array[i]);
+            int i = c->execute(it, array.end());
+            for (int j = 0; j < i; ++j) {
+                it++;
+            }
+        } else if (vm->isExists(*it)) {
+            //for variables
+            string n = *it;
+            it++;
+            if (it == array.end()) {
+                throw "Error";
+            }
+            if((*it) == "=") {
+                Command::lock();
+                it++;
+                ExpressionReader er;
+                list<string>::iterator end = array.end();
+                list<string> l = er.getExpressions(it, end);
+                double val = ef->create(l)->calculate();
+                Command::unlock();
+                vm->set(n, val);
+
+            } else {
+                throw "Error";
+            }
+        } else {
+            cout << *it << endl;
+            throw "Error";
         }
     }
 }

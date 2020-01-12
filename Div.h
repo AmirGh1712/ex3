@@ -9,6 +9,11 @@
  */
 class Div : public BinaryOperator {
 public:
+    /**
+     * Constructor.
+     * @param left the left expression.
+     * @param right the right expression.
+     */
     Div(Expression* left, Expression* right) : BinaryOperator(left, right){}
     virtual double calculate();
 };

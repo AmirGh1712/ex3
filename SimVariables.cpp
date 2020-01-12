@@ -1,0 +1,40 @@
+#include "SimVariables.h"
+
+void SimVariables::create() {
+    this->lst.push_front("/instrumentation/airspeed-indicator/indicated-speed-kt");
+    this->lst.push_front("/sim/time/warp");
+    this->lst.push_front("/controls/switches/magnetos");
+    this->lst.push_front("/instrumentation/heading-indicator/offset-deg");
+    this->lst.push_front("/instrumentation/altimeter/indicated-altitude-ft");
+    this->lst.push_front("/instrumentation/altimeter/pressure-alt-ft");
+    this->lst.push_front("/instrumentation/attitude-indicator/indicated-pitch-deg");
+    this->lst.push_front("/instrumentation/attitude-indicator/indicated-roll-deg");
+    this->lst.push_front("/instrumentation/attitude-indicator/internal-pitch-deg");
+    this->lst.push_front("/instrumentation/attitude-indicator/internal-roll-deg");
+    this->lst.push_front("/instrumentation/encoder/indicated-altitude-ft");
+    this->lst.push_front("/instrumentation/encoder/pressure-alt-ft");
+    this->lst.push_front("/instrumentation/gps/indicated-altitude-ft");
+    this->lst.push_front("/instrumentation/gps/indicated-ground-speed-kt");
+    this->lst.push_front("/instrumentation/gps/indicated-vertical-speed");
+    this->lst.push_front("/instrumentation/heading-indicator/indicated-heading-deg");
+    this->lst.push_front("/instrumentation/magnetic-compass/indicated-heading-deg");
+    this->lst.push_front("/instrumentation/slip-skid-ball/indicated-slip-skid");
+    this->lst.push_front("/instrumentation/turn-indicator/indicated-turn-rate");
+    this->lst.push_front("/instrumentation/vertical-speed-indicator/indicated-speed-fpm");
+    this->lst.push_front("/controls/flight/aileron");
+    this->lst.push_front("/controls/flight/elevator");
+    this->lst.push_front("/controls/flight/rudder");
+    this->lst.push_front("/controls/flight/flaps");
+    this->lst.push_front("/controls/engines/engine/throttle");
+    this->lst.push_front("/controls/engines/current-engine/throttle");
+    this->lst.push_front("/controls/switches/master-avionics");
+    this->lst.push_front("/controls/switches/starter");
+    this->lst.push_front("/engines/active-engine/auto-start");
+    this->lst.push_front("/controls/flight/speedbrake");
+    this->lst.push_front("/sim/model/c172p/brake-parking");
+    this->lst.push_front("/controls/engines/engine/primer");
+    this->lst.push_front("/controls/engines/current-engine/mixture");
+    this->lst.push_front("/controls/switches/master-bat");
+    this->lst.push_front("/controls/switches/master-alt");
+    this->lst.push_front("/engines/engine/rpm");
+}

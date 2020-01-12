@@ -1,24 +1,24 @@
-//
-// Created by iddo on 08/01/2020.
-//
-
-#ifndef UNTITLED_BOOLEXPRESSION_H
-#define UNTITLED_BOOLEXPRESSION_H
+#ifndef BOOL_EXPRESSION_H
+#define BOOL_EXPRESSION_H
 
 #include <string>
 #include "BinaryOperator.h"
 
-#include <stdexcept>
-
 class BoolExpression : public BinaryOperator {
     string condition;
 public:
+    /**
+     * Constructor.
+     * @param left the left expression.
+     * @param c the boolean sign.
+     * @param right the right expression.
+     */
     BoolExpression(Expression *left, string c, Expression *right) : BinaryOperator(left, right) {
-        this->condition = c;
+        this->condition.assign(c);
     }
 
-    double calculate();
+    virtual double calculate();
 };
 
 
-#endif //UNTITLED_BOOLEXPRESSION_H
+#endif //BOOL_EXPRESSION_H

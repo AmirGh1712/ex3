@@ -1,7 +1,3 @@
-//
-// Created by iddo on 24/12/2019.
-//
-
 #include "Lexer.h"
 
 string Lexer::replaceSubString(string subject, const string &search, const string &replace) {
@@ -33,13 +29,22 @@ list<string> Lexer::lexer(string &s, char delimiter) {
     }
     string str;
     bool take = false;
-    for (auto &s :tokens) {
-        if (take) {
-            str += s;
-        }
-        if (s == "\"" && !take) {
+    bool first = true;
+    for (auto &st :tokens) {
+        if (take && st != "\"") {
+            if (!first) {
+                str += " ";
+            } else {
+                first = false;
+            }
+            str += st;
+        } else if (st == "\"" && !take) {
             take = true;
-            str += s;
+            str += st;
+        } else if (st == "\"" && take) {
+            str += st;
+            take = false;
+            first = true;
         }
     }
     bool found = false;
@@ -58,7 +63,7 @@ list<string> Lexer::lexer(string &s, char delimiter) {
                 --it;
                 if (cSign == "\"") {
                     if (found) {
-                        final_tokens.push_back(str);
+                        found = false;
                     } else {
                         found = true;
                         final_tokens.push_back(str);
@@ -76,5 +81,6 @@ list<string> Lexer::lexer(string &s, char delimiter) {
             break;
         }
     }
+    final_tokens.remove("");
     return final_tokens;
 }

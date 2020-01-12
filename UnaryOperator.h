@@ -11,7 +11,10 @@ class UnaryOperator : public Expression {
 protected:
     Expression* e;
 public:
-    //Constructor.
+    /**
+     * Constructor.
+     * @param expression the expression.
+     */
     UnaryOperator(Expression* expression) {
         this->e = expression;
     }

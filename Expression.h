@@ -1,6 +1,6 @@
 
-#ifndef PROJECT_EXPRESSION_H
-#define PROJECT_EXPRESSION_H
+#ifndef EXPRESSION_H
+#define EXPRESSION_H
 
 using namespace std;
 /**
@@ -9,8 +9,15 @@ using namespace std;
 class Expression {
 
 public:
+    /**
+     * Calculate the expression.
+     * @return the value of the expression.
+     */
     virtual double calculate() = 0;
+    /**
+     * Destructor.
+     */
     virtual ~Expression() {}
 };
 
-#endif //PROJECT_EXPRESSION_H
+#endif //EXPRESSION_H

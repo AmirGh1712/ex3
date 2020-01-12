@@ -1,6 +1,3 @@
-// Created by amir on 30/12/2019.
-//
-
 #include "Command.h"
 
 string checkString(string str) {
@@ -11,17 +8,17 @@ string checkString(string str) {
 }
 
 int strToInt(string str) {
-    int i = 0 , neg = 0;
+    unsigned int i = 0 , neg = 0;
     int num = 0;
     int power10 = 1;
     if(str[0] == '-') {
         i++;
         neg = 1;
     }
-    for (int j = i; j < str.length() - 1; ++j) {
+    for (unsigned int j = i; j < str.length() - 1; ++j) {
         power10 *= 10;
     }
-    for (i; i < str.length(); ++i) {
+    for (; i < str.length(); ++i) {
         if (!(str[i] >= '0' && str[i] <= '9')) {
             cerr << "Not a number." << endl;
             return 0;

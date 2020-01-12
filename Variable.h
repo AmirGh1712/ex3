@@ -1,22 +1,50 @@
 //
-// Created by amir on 01/01/2020.
+// Created by amir on 23/11/2019.
 //
 
-#ifndef EX3_11_VARIABLE_H
-#define EX3_11_VARIABLE_H
+#ifndef VARIABLE_H
+#define VARIABLE_H
 
 #include <string>
-
-class Variable {
-private:
-    int value;
-    std::string sim;
+#include "Expression.h"
+/**
+ * Variable Class
+ */
+class Variable : public Expression {
+string name;
+double value;
 public:
-    Variable(int val, std::string s) {
+    /**
+     * Constructor.
+     * @param n the variable name.
+     * @param val the variable value.
+     */
+    Variable(string n, double val) {
+        this->name.assign(n);
         this->value = val;
-        this->sim.assign(s);
+    }
+    virtual double calculate();
+    Variable & operator++();
+    Variable & operator--();
+    Variable& operator+=(const double& num);
+    Variable& operator-=(const double& num);
+    Variable & operator++(int);
+    Variable & operator--(int);
+    /**
+     * Sets the value.
+     * @param v the new value.
+     */
+    virtual void set(double v);
+    /**
+     * Returns the name of the variable.
+     * @return the name of the variable.
+     */
+    string getName() {
+        string tmp;
+        tmp.assign(this->name);
+        return tmp;
     }
 };
 
 
-#endif //EX3_11_VARIABLE_H
+#endif //VARIABLE_H

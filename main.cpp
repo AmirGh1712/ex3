@@ -1,138 +1,101 @@
 #include <iostream>
-#include <regex>
-
+#include "Parser.h"
+#include "PrintCommand.h"
+#include "ExpressionReader.h"
+#include "ExpressionFactory.h"
+#include "VariablesMap.h"
+#include "VarCommand.h"
+#include "SleepCommand.h"
+#include "IfCommand.h"
+#include "WhileCommand.h"
+#include "OpenServerCommand.h"
+#include "ConnectCommand.h"
+#include <fstream>
 #include "Lexer.h"
-using namespace std;
-int main() {
-    string s1 = "openDataServer 5400";
-    string s2 = "connect 127.0.0.1 5402";
-    Lexer l;
 
-/////////////////////////////////////////////////////////////////////////////////
-
-    string s3 = "var breaks=bind \"/controls/flight/speedbrake\"";
-    string s4 = "var throttle = bind \"/controls/engines/current-engine/throttle\"";
-    string s5 = "var heading = bind \"/instrumentation/heading-indicator/offset-deg\"";
-    string s6 ="var airspeed = bind \"/instrumentation/airspeed-indicator/indicated-speed-kt\"";
-    string s7= "var roll = bind\"/instrumentation/attitude-indicator/indicated-roll-deg\"";
-    string s8 = "var pitch = bind\"/instrumentation/attitude-indicator/internal-pitch-deg\"";
-    string s9 ="var rudder = bind \"/controls/flight/rudder\"";
-    string s10 ="var aileron = bind \"/controls/flight/aileron\"";
-    string s11 ="var elevator = bind \"/controls/flight/elevator\"";
-    string s12 ="var alt = bind \"/instrumentation/altimeter/indicated-altitude-ft\"";
-    string s13 ="breaks = 0";
-    string s14 ="throttle = 1";
-    string s15 ="var h0 = heading";
-    string s16 ="while alt < 1000+h0";
-    string s17 ="{";
-    string s18 ="    rudder = (h0 -heading)/20";
-    string s19 ="    aileron = -roll / 70";
-    string s20 ="    elevator = pitch / 50";
-    string s21 ="    print alt";
-    string s22 ="    sleep 250";
-    string s23 ="}";
-    string s24 ="print \"done\"";
-    ////////////////////////////////////////////////////////////////
-
-    list<string> tokens3 = l.lexer(s3, ' ');
-    for (string &s:tokens3) {
-        cout << s << endl;
+int main(int argc, char** argv) {
+    if (argc < 2) {
+        throw "Error";
     }
-    cout << "done 3" << endl;
-    cout << "----------------------------------------------" << endl;
+    VariablesMap* vm = new VariablesMap();
+    VariablesMap* svm = new VariablesMap();
+    ExpressionFactory* ef = new ExpressionFactory(vm);
+
+    map<string, Command*> map;
+    PrintCommand* p = new PrintCommand(ef);
+    SleepCommand* s = new SleepCommand(ef);
+    IfCommand* i = new IfCommand(ef, &map, vm);
+    WhileCommand* w = new WhileCommand(ef, &map, vm);
+    OpenServerCommand* os = new OpenServerCommand(svm, ef);
+    ConnectCommand* cc = new ConnectCommand(ef);
+    VarCommand* vc = new VarCommand(svm, vm, ef, cc);
+
+    map["Print"] = p;
+    map["var"] = vc;
+    map["Sleep"] = s;
+    map["if"] = i;
+    map["while"] = w;
+    map["openDataServer"] = os;
+    map["connectControlClient"] = cc;
+
+    char* fileName = argv[1];
+
+    std::ifstream t;
+    int length;
+    t.open(fileName);      // open input file
+    t.seekg(0, std::ios::end);    // go to the end
+    length = t.tellg();           // report location (this is the length)
+    t.seekg(0, std::ios::beg);    // go back to the beginning
+    char *buffer = new char[length];    // allocate memory for a buffer of appropriate dimension
+    t.read(buffer, length);       // read the whole file into the buffer
+    t.close();
+    Lexer lexer;
+
+    string str;
+    list<string> arr;
+    for (int j = 0; j < length; ++j) {
+        if (buffer[j] != '\n') {
+            str += buffer[j];
+        } else {
 
 
+            list<string> tmp = lexer.lexer(str, ' ');
+            for (auto &st :tmp) {
+                if (st != "" && st != " " && st != "\n" && st != "\t") {
 
-    cout << "----------------------------------------------" << endl;
+                    arr.push_back(st);
+                }
 
-    list<string> tokens = l.lexer(s1, ' ');
-    for (string &s:tokens) {
-        cout << s << endl;
+            }
+            arr.push_back("\n");
+            str = "";
+        }
     }
-    cout << "done 1" << endl;
-    cout << "----------------------------------------------" << endl;
-    list<string> tokens2 = l.lexer(s2, ' ');
-    for (string &s:tokens2) {
-        cout << s << endl;
-    }
-    cout << "done 2" << endl;
+    //last one
 
-    cout << "----------------------------------------------" << endl;
+    list<string> tmp = lexer.lexer(str, ' ');
+    for (auto &st :tmp) {
+        if (st != "" && st != " " && st != "\n" && st != "\t") {
 
-    list<string> tokens14 = l.lexer(s14, ' ');
-    for (string &s:tokens14) {
-        cout << s << endl;
-    }
-    cout << "done 14" << endl;
-    cout << "----------------------------------------------" << endl;
+            arr.push_back(st);
+        }
 
-    list<string> tokens15 = l.lexer(s15, ' ');
-    for (string &s:tokens15) {
-        cout << s << endl;
     }
-    cout << "done 15" << endl;
-    cout << "----------------------------------------------" << endl;
+    arr.push_back("\n");
+    parser(arr, map, vm, ef);
 
-    list<string> tokens16 = l.lexer(s16, ' ');
-    for (string &s:tokens16) {
-        cout << s << endl;
-    }
-    cout << "done 16" << endl;
-    cout << "----------------------------------------------" << endl;
+    cc->join();
+    os->join();
 
-    list<string> tokens17 = l.lexer(s17, ' ');
-    for (string &s:tokens17) {
-        cout << s << endl;
-    }
-    cout << "done 17" << endl;
-    cout << "----------------------------------------------" << endl;
-
-    list<string> tokens18 = l.lexer(s18, ' ');
-    for (string &s:tokens18) {
-        cout << s << endl;
-    }
-    cout << "done 18" << endl;
-    cout << "----------------------------------------------" << endl;
-
-    list<string> tokens19 = l.lexer(s19, ' ');
-    for (string &s:tokens19) {
-        cout << s << endl;
-    }
-    cout << "done 19" << endl;
-    cout << "----------------------------------------------" << endl;
-
-    list<string> tokens20 = l.lexer(s20, ' ');
-    for (string &s:tokens20) {
-        cout << s << endl;
-    }
-    cout << "done 20" << endl;
-    cout << "----------------------------------------------" << endl;
-
-    list<string> tokens21 = l.lexer(s21, ' ');
-    for (string &s:tokens21) {
-        cout << s << endl;
-    }
-    cout << "done 21" << endl;
-    cout << "----------------------------------------------" << endl;
-
-    list<string> tokens22 = l.lexer(s22, ' ');
-    for (string &s:tokens22) {
-        cout << s << endl;
-    }
-    cout << "done 22" << endl;
-    cout << "----------------------------------------------" << endl;
-    list<string> tokens23 = l.lexer(s23, ' ');
-    for (string &s:tokens23) {
-        cout << s << endl;
-    }
-    cout << "done 23" << endl;
-    cout << "----------------------------------------------" << endl;
-    list<string> tokens24 = l.lexer(s24, ' ');
-    for (string &s:tokens24) {
-        cout << s << endl;
-    }
-    cout << "done 24" << endl;
-    cout << "----------------------------------------------" << endl;
-
+    delete(p);
+    delete(s);
+    delete(vc);
+    delete(i);
+    delete(w);
+    delete(os);
+    //delete(cc);
+    delete(vm);
+    delete(svm);
+    delete(ef);
     return 0;
 }
